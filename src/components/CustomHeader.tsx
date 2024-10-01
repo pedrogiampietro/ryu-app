@@ -1,5 +1,6 @@
+// components/CustomHeader.tsx
 import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity, StatusBar } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -10,18 +11,19 @@ interface CustomHeaderProps {
 const CustomHeader: React.FC<CustomHeaderProps> = ({ title }) => {
   const router = useRouter();
 
+  const statusBarHeight = StatusBar.currentHeight || 0;
+
   return (
-    <View className="flex-row items-center justify-between bg-gray-900 p-4 pt-20">
-      {/* Botão de voltar */}
-      <TouchableOpacity onPress={() => router.back()}>
-        <Ionicons name="arrow-back" size={24} color="white" />
-      </TouchableOpacity>
+    <View className="bg-gray-900" style={{ paddingTop: statusBarHeight }}>
+      <View className="flex-row items-center justify-between p-4">
+        <TouchableOpacity onPress={() => router.back()}>
+          <Ionicons name="arrow-back" size={24} color="white" />
+        </TouchableOpacity>
 
-      {/* Título central */}
-      <Text className="text-lg font-bold text-white">{title}</Text>
+        <Text className="text-lg font-bold text-white">{title}</Text>
 
-      {/* Espaço vazio para alinhar o título */}
-      <View style={{ width: 24 }} />
+        <View style={{ width: 24 }} />
+      </View>
     </View>
   );
 };
