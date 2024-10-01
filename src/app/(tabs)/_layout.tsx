@@ -20,12 +20,13 @@ export default function TabLayout() {
           ),
         }}
       />
+
       <Tabs.Screen
-        name="two"
+        name="auth"
         options={{
-          title: 'Settings',
+          title: 'Auth',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="settings-outline" color={color} size={size} />
+            <Ionicons name="home-outline" color={color} size={size} />
           ),
         }}
       />
