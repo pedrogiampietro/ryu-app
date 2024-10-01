@@ -8,16 +8,15 @@ interface MangaCardProps {
 
 export default function MangaCard({ manga, onPress }: MangaCardProps) {
   return (
-    <TouchableOpacity className="mr-4" onPress={onPress}>
-      <Image source={{ uri: manga.cover }} className="h-60 w-40 rounded-lg" />
+    <TouchableOpacity style={{ marginRight: 16 }} onPress={onPress}>
+      <Image source={{ uri: manga.cover }} style={{ width: 160, height: 240, borderRadius: 10 }} />
       <Text
-        className="mt-2 text-white"
+        style={{ marginTop: 8, color: 'white', width: 160 }}
         numberOfLines={2}
-        ellipsizeMode="tail"
-        style={{ width: 160 }}>
+        ellipsizeMode="tail">
         {manga.name}
       </Text>
-      <Text className="text-gray-400" numberOfLines={2} ellipsizeMode="tail" style={{ width: 160 }}>
+      <Text style={{ color: 'gray', width: 160 }} numberOfLines={2} ellipsizeMode="tail">
         {manga.lastChapter} - {manga.rating} ⭐
       </Text>
     </TouchableOpacity>

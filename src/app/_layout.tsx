@@ -11,6 +11,7 @@ export default function RootLayout() {
     <Stack>
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen name="manga/[id]/index" options={{ headerShown: false }} />
+      <Stack.Screen name="manga/[id]/chapter/[chapterSlug]" options={{ headerShown: false }} />
     </Stack>
   );
 }

@@ -4,6 +4,7 @@ import { useRouter, useGlobalSearchParams } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import CustomHeader from '@/components/CustomHeader';
 import { MangaDetails } from '@/types/manga-details';
+import { generateChapterSlug } from '@/utils/generateChapterSlug';
 
 export default function MangaDetailsPage() {
   const router = useRouter();
@@ -103,14 +104,13 @@ export default function MangaDetailsPage() {
         <View className="mb-6">
           <Text className="text-lg font-bold text-white">Capítulos</Text>
           {manga.episodes.map((episode, index) => {
-            const encodedTitle = encodeURIComponent(episode.title);
+            const chapterSlug = generateChapterSlug(episode.title);
             return (
               <TouchableOpacity
                 key={index}
                 className="mb-4 flex-row items-center rounded-lg bg-gray-800 p-4"
                 onPress={() => {
-                  console.log('Navigating to:', `/manga/${id}/chapter/${encodedTitle}`);
-                  router.push(`/manga/${id}/chapter/${encodedTitle}`);
+                  router.push(`/manga/${id}/chapter/${chapterSlug}`);
                 }}>
                 <Text className="text-white">{episode.title}</Text>
                 <Text className="ml-auto text-gray-400">{episode.releaseDate}</Text>
