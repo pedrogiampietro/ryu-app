@@ -50,7 +50,22 @@ export default function Auth() {
         if (error) {
           Alert.alert('Erro', error.message);
         } else {
-          setUser(data.user);
+          const user = data.user;
+          setUser(user, data.session?.access_token);
+
+          await fetch('http://192.168.0.68:3333/v1/user/sync', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${data.session?.access_token}`,
+            },
+            body: JSON.stringify({
+              id: user.id,
+              email: user.email,
+              name: user.user_metadata.name,
+              avatar: user.user_metadata.picture,
+            }),
+          });
         }
       } else {
         throw new Error('Token de ID não encontrado!');
