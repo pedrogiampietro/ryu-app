@@ -14,8 +14,10 @@ export interface User {
 interface AuthState {
   user: User | null;
   token: string | null;
+  hydrated: boolean;
   setUser: (userData: User, token: string) => void;
   clearUser: () => void;
+  setHydrated: (state: boolean) => void;
 }
 
 const asyncStorage: PersistStorage<AuthState> = {
@@ -36,12 +38,17 @@ export const useAuthStore = create<AuthState>()(
     (set) => ({
       user: null,
       token: null,
+      hydrated: false,
       setUser: (userData: User, token: string) => set({ user: userData, token }),
       clearUser: () => set({ user: null, token: null }),
+      setHydrated: (state: boolean) => set({ hydrated: state }),
     }),
     {
       name: 'auth-storage',
       storage: asyncStorage,
+      onRehydrateStorage: () => (state) => {
+        state?.setHydrated(true);
+      },
     }
   )
 );

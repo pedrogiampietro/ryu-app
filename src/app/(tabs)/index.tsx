@@ -1,14 +1,21 @@
-import { ScrollView, Image, Text, View, TouchableOpacity } from 'react-native';
+import { ScrollView, Image, Text, View, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useRouter } from 'expo-router';
 import MangaCard from '@/components/MangaCard';
 import ChapterListItem from '@/components/ChapterListItem';
-import { useFetch } from '@/hooks/useFetch';
+
 import { Manga } from '@/types/manga';
 import { useState, useEffect, useCallback } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
+import {
+  getFavorites,
+  addFavorite,
+  removeFavorite,
+  getTrendingMangas,
+  getLatestMangas,
+} from '@/services/https/home-get-data';
 
 interface LastRead {
   mangaId: string;
@@ -23,18 +30,60 @@ export default function Home() {
   const router = useRouter();
   const [isListView, setIsListView] = useState<boolean>(false);
   const [lastRead, setLastRead] = useState<LastRead[]>([]);
+  const [favorites, setFavorites] = useState<Set<string>>(new Set());
 
-  const {
-    data: trendingMangas,
-    loading: trendingLoading,
-    error: trendingError,
-  } = useFetch<Manga>('http://192.168.0.68:3333/v1/ananquim/trending');
+  const [trendingMangas, setTrendingMangas] = useState<Manga[]>([]);
+  const [trendingLoading, setTrendingLoading] = useState<boolean>(true);
+  const [trendingError, setTrendingError] = useState<any>(null);
 
-  const {
-    data: latestMangas,
-    loading: latestLoading,
-    error: latestError,
-  } = useFetch<Manga>('http://192.168.0.68:3333/v1/ananquim/latest');
+  const [latestMangas, setLatestMangas] = useState<Manga[]>([]);
+  const [latestLoading, setLatestLoading] = useState<boolean>(true);
+  const [latestError, setLatestError] = useState<any>(null);
+
+  const fetchFavorites = async () => {
+    try {
+      const favoritesData = await getFavorites();
+      setFavorites(new Set(favoritesData.map((manga: Manga) => manga.id)));
+    } catch (error) {
+      console.error('Error fetching favorites:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchFavorites();
+  }, []);
+
+  useEffect(() => {
+    const fetchTrendingMangas = async () => {
+      setTrendingLoading(true);
+      try {
+        const data = await getTrendingMangas();
+        setTrendingMangas(data);
+      } catch (error) {
+        setTrendingError(error);
+      } finally {
+        setTrendingLoading(false);
+      }
+    };
+
+    fetchTrendingMangas();
+  }, []);
+
+  useEffect(() => {
+    const fetchLatestMangas = async () => {
+      setLatestLoading(true);
+      try {
+        const data = await getLatestMangas();
+        setLatestMangas(data);
+      } catch (error) {
+        setLatestError(error);
+      } finally {
+        setLatestLoading(false);
+      }
+    };
+
+    fetchLatestMangas();
+  }, []);
 
   const getLastRead = async () => {
     try {
@@ -68,7 +117,7 @@ export default function Home() {
   if (trendingLoading || latestLoading) {
     return (
       <View className="flex-1 items-center justify-center bg-[#121214]">
-        <Text className="text-white">Carregando...</Text>
+        <ActivityIndicator size="large" color="#8234e9" />
       </View>
     );
   }
@@ -76,10 +125,30 @@ export default function Home() {
   if (trendingError || latestError) {
     return (
       <View className="flex-1 items-center justify-center bg-[#121214]">
-        <Text className="text-[#ff4d4d]">Erro: {trendingError || latestError}</Text>
+        <Text className="text-[#ff4d4d]">
+          Erro: {trendingError?.message || latestError?.message}
+        </Text>
       </View>
     );
   }
+
+  const toggleFavorite = async (mangaId: string) => {
+    try {
+      if (favorites.has(mangaId)) {
+        await removeFavorite(mangaId);
+        setFavorites((prev) => {
+          const newSet = new Set(prev);
+          newSet.delete(mangaId);
+          return newSet;
+        });
+      } else {
+        await addFavorite(mangaId);
+        setFavorites((prev) => new Set(prev).add(mangaId));
+      }
+    } catch (error) {
+      console.error('Error toggling favorite:', error);
+    }
+  };
 
   return (
     <>
@@ -117,6 +186,8 @@ export default function Home() {
                 <MangaCard
                   manga={manga}
                   onPress={() => router.push(`/manga/${manga.identifier}`)}
+                  onFavoritePress={() => toggleFavorite(manga.id)}
+                  isFavorite={favorites.has(manga.id)}
                 />
               </View>
             ))}
@@ -152,6 +223,8 @@ export default function Home() {
                   <MangaCard
                     manga={manga}
                     onPress={() => router.push(`/manga/${manga.identifier}`)}
+                    onFavoritePress={() => toggleFavorite(manga.id)}
+                    isFavorite={favorites.has(manga.id)}
                   />
                 </View>
               ))}

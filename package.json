@@ -20,6 +20,7 @@
     "@react-native-google-signin/google-signin": "^13.1.0",
     "@react-navigation/native": "^6.1.7",
     "@supabase/supabase-js": "^2.38.4",
+    "axios": "^1.7.7",
     "expo": "~51.0.35",
     "expo-constants": "~16.0.1",
     "expo-dev-client": "~4.0.14",
