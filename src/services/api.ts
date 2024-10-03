@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { useAuthStore } from '@/store/authStore';
+import { supabase } from '@/utils/supabase';
 
 const limit = 20;
 
@@ -26,11 +26,16 @@ export const apiClient = axios.create({
 });
 
 apiClient.interceptors.request.use(
-  (request) => {
-    const { token, hydrated } = useAuthStore.getState();
+  async (request) => {
+    const {
+      data: { session },
+      error,
+    } = await supabase.auth.getSession();
 
-    if (hydrated && token) {
-      request.headers.Authorization = `Bearer ${token}`;
+    if (session?.access_token) {
+      request.headers.Authorization = `Bearer ${session.access_token}`;
+    } else {
+      console.warn('No access token available for API request.');
     }
 
     if (request.method?.toLowerCase() === 'get') {

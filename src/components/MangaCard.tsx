@@ -14,8 +14,13 @@ export default function MangaCard({ manga, onPress, onFavoritePress, isFavorite 
     <TouchableOpacity style={{ marginRight: 16 }} onPress={onPress}>
       <View style={{ position: 'relative' }}>
         <Image
-          source={{ uri: manga.cover }}
+          source={{
+            uri: manga.cover.startsWith('http')
+              ? manga.cover
+              : `${process.env.EXPO_PUBLIC_API_URL}/${manga.cover}`,
+          }}
           style={{ width: 160, height: 240, borderRadius: 10 }}
+          resizeMode="cover"
         />
         <TouchableOpacity
           style={{ position: 'absolute', top: 5, right: 5, padding: 5 }}

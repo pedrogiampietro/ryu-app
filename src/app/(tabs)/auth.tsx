@@ -9,15 +9,17 @@ import { supabase } from '@/utils/supabase';
 import { useAuthStore } from '@/store/authStore';
 
 export default function Auth() {
-  const { user, setUser, clearUser } = useAuthStore();
+  const { user, token, setUser, clearUser } = useAuthStore();
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const checkUser = async () => {
       setLoading(true);
-      const { data: session } = await supabase.auth.getUser();
-      if (session) {
-        setUser(session.user);
+
+      const { data } = await supabase.auth.getSession();
+
+      if (data) {
+        setUser(data.session?.user, data.session?.access_token);
       }
       setLoading(false);
     };
@@ -25,7 +27,7 @@ export default function Auth() {
 
     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
       if (session) {
-        setUser(session.user);
+        setUser(session.user, token);
       } else {
         clearUser();
       }
@@ -51,7 +53,8 @@ export default function Auth() {
           Alert.alert('Erro', error.message);
         } else {
           const user = data.user;
-          setUser(user, data.session?.access_token);
+          const accessToken = data.session.access_token;
+          setUser(user, accessToken);
 
           await fetch('http://192.168.0.68:3333/v1/user/sync', {
             method: 'POST',

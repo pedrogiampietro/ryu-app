@@ -110,7 +110,10 @@ export default function MangaDetailsPage() {
                 key={index}
                 className="mb-4 flex-row items-center rounded-lg bg-[#09090a] p-4"
                 onPress={() => {
-                  router.push(`/manga/${id}/chapter/${chapterSlug}`);
+                  router.push({
+                    pathname: `/manga/${id}/chapter/${chapterSlug}` as any,
+                    params: { totalEpisodes: manga.episodes.length, cover: manga.image },
+                  });
                 }}>
                 <Text className="text-[#8234e9]">{episode.title}</Text>
                 <Text className="ml-auto text-[#a1a1aa]">{episode.releaseDate}</Text>

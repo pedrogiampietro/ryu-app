@@ -4,7 +4,7 @@ import { persist, PersistStorage } from 'zustand/middleware';
 
 export interface User {
   id: string;
-  email: string;
+  email: string | undefined;
   user_metadata: {
     name: string;
     picture: string;

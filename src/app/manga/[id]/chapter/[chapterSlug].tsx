@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useContext } from 'react';
 import {
   View,
   ScrollView,
@@ -15,9 +15,12 @@ import CustomHeader from '@/components/CustomHeader';
 import { GestureHandlerRootView, Gesture, PinchGestureHandler } from 'react-native-gesture-handler';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useAuthStore } from '@/store/authStore';
+import { addLastRead } from '@/services/https/last-read-data';
 
 export default function ChapterPage() {
-  const { id, chapterSlug } = useGlobalSearchParams();
+  const { user } = useAuthStore();
+  const { id, chapterSlug, totalEpisodes, cover } = useGlobalSearchParams();
   const [chapter, setChapter] = useState<Chapter | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -72,36 +75,56 @@ export default function ChapterPage() {
         lastReadAt: new Date().toISOString(),
       };
 
-      try {
-        const existingData = await AsyncStorage.getItem('LAST_READ');
-        let lastReadArray: (typeof lastReadItem)[] = [];
+      if (user) {
+        const currentEpisodeNumber =
+          typeof chapterSlug === 'string' ? parseInt(chapterSlug.replace(/\D/g, ''), 10) : 0;
+        const payload = {
+          userId: user.id,
+          mangaId: lastReadItem.mangaId,
+          cover,
+          title: lastReadItem.mangaTitle,
+          episodio: lastReadItem.chapterSlug,
+          currentEpisode: isNaN(currentEpisodeNumber) ? 0 : currentEpisodeNumber,
+          totalEpisodes: totalEpisodes || 1,
+        };
 
-        if (existingData != null) {
-          const parsedData = JSON.parse(existingData);
-          if (Array.isArray(parsedData)) {
-            lastReadArray = parsedData;
-          } else if (typeof parsedData === 'object') {
-            lastReadArray = [parsedData];
+        try {
+          await addLastRead(payload as any);
+        } catch (error) {
+          console.error('Erro ao salvar no servidor:', error);
+        }
+      } else {
+        try {
+          const existingData = await AsyncStorage.getItem('LAST_READ');
+          let lastReadArray: (typeof lastReadItem)[] = [];
+
+          if (existingData != null) {
+            const parsedData = JSON.parse(existingData);
+            if (Array.isArray(parsedData)) {
+              lastReadArray = parsedData;
+            } else if (typeof parsedData === 'object') {
+              lastReadArray = [parsedData];
+            }
           }
+
+          const existingIndex = lastReadArray.findIndex(
+            (item) => item.mangaId === lastReadItem.mangaId
+          );
+
+          if (existingIndex !== -1) {
+            lastReadArray[existingIndex] = lastReadItem;
+          } else {
+            lastReadArray.unshift(lastReadItem);
+          }
+
+          if (lastReadArray.length > 10) {
+            lastReadArray = lastReadArray.slice(0, 10);
+          }
+
+          await AsyncStorage.setItem('LAST_READ', JSON.stringify(lastReadArray));
+        } catch (error) {
+          console.error('Erro ao salvar o(s) último(s) capítulo(s) lido(s):', error);
         }
-
-        const existingIndex = lastReadArray.findIndex(
-          (item) => item.mangaId === lastReadItem.mangaId
-        );
-
-        if (existingIndex !== -1) {
-          lastReadArray[existingIndex] = lastReadItem;
-        } else {
-          lastReadArray.unshift(lastReadItem);
-        }
-
-        if (lastReadArray.length > 10) {
-          lastReadArray = lastReadArray.slice(0, 10);
-        }
-
-        await AsyncStorage.setItem('LAST_READ', JSON.stringify(lastReadArray));
-      } catch (error) {
-        console.error('Erro ao salvar o(s) último(s) capítulo(s) lido(s):', error);
       }
     }
   };
@@ -161,7 +184,7 @@ export default function ChapterPage() {
       </View>
 
       <ScrollView
-        ref={scrollViewRef} // Anexando a referência aqui
+        ref={scrollViewRef}
         style={styles.scrollView}
         contentContainerStyle={styles.contentContainer}>
         <PinchGestureHandler gesture={onPinchGesture}>
