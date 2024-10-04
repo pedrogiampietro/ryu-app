@@ -9,9 +9,9 @@ interface MangaCardProps {
   isFavorite: boolean;
 }
 
-export default function MangaCard({ manga, onPress, onFavoritePress, isFavorite }: MangaCardProps) {
+export function MangaCard({ manga, onPress, onFavoritePress, isFavorite }: MangaCardProps) {
   return (
-    <TouchableOpacity style={{ marginRight: 16 }} onPress={onPress}>
+    <TouchableOpacity style={{ marginRight: 16 }} onPress={onPress} testID="manga-card">
       <View style={{ position: 'relative' }}>
         <Image
           source={{
@@ -24,7 +24,8 @@ export default function MangaCard({ manga, onPress, onFavoritePress, isFavorite 
         />
         <TouchableOpacity
           style={{ position: 'absolute', top: 5, right: 5, padding: 5 }}
-          onPress={onFavoritePress}>
+          onPress={onFavoritePress}
+          testID="favorite-button">
           <Ionicons
             name={isFavorite ? 'heart' : 'heart-outline'}
             size={24}

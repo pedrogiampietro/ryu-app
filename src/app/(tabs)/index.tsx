@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { ScrollView, Image, Text, View, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useRouter } from 'expo-router';
-import MangaCard from '@/components/MangaCard';
+import { MangaCard } from '@/components/MangaCard';
 import ChapterListItem from '@/components/ChapterListItem';
 import { Manga } from '@/types/manga';
 import { Ionicons } from '@expo/vector-icons';
@@ -299,7 +299,9 @@ export default function Home() {
                   <ChapterListItem
                     key={`${manga.identifier}-list`}
                     manga={manga}
-                    onPress={() => router.push(`/manga/${manga.identifier}/chapter`)}
+                    onPress={() =>
+                      router.push(`/manga/${manga.identifier}/chapter/${manga.lastChapter}`)
+                    }
                   />
                 );
               })}

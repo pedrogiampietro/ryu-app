@@ -26,7 +26,7 @@ export default function TabLayout() {
         options={{
           title: 'Auth',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="home-outline" color={color} size={size} />
+            <Ionicons name="person-circle" color={color} size={size} />
           ),
         }}
       />
