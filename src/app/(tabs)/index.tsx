@@ -3,7 +3,7 @@ import { ScrollView, Image, Text, View, TouchableOpacity, ActivityIndicator } fr
 import { StatusBar } from 'expo-status-bar';
 import { useRouter } from 'expo-router';
 import { MangaCard } from '@/components/MangaCard';
-import ChapterListItem from '@/components/ChapterListItem';
+import { ChapterListItem } from '@/components/ChapterListItem';
 import { Manga } from '@/types/manga';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
